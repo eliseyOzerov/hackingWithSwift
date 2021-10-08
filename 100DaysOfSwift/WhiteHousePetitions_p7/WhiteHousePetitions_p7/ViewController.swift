@@ -13,7 +13,7 @@ class ViewController: UITableViewController {
     
     var filteredPetitions: [Petition] {
         if let filter = filter {
-           return petitions.filter { $0.body.lowercased().contains(filter) || $0.title.lowercased().contains(filter) } ?? []
+            return petitions.filter { $0.body.lowercased().contains(filter) || $0.title.lowercased().contains(filter) }
         }
         return petitions
     }
