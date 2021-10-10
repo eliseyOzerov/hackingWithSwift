@@ -126,7 +126,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadLevel()
+        performSelector(inBackground: #selector(loadLevel), with: nil)
     }
     
     @objc func letterTapped(_ sender: UIButton) {
@@ -175,7 +175,7 @@ class ViewController: UIViewController {
         activatedButtons.removeAll()
     }
     
-    func loadLevel() {
+    @objc func loadLevel() {
         var clueString = ""
         var solutionString = ""
         var letterBits = [String]()
@@ -188,19 +188,26 @@ class ViewController: UIViewController {
                     let parts = line.components(separatedBy: ": ")
                     let answer = parts[0]
                     let clue = parts[1]
-                    
+
                     clueString += "\(index+1). \(clue)\n"
-                    
+
                     let solutionWord = answer.replacingOccurrences(of: "|", with: "")
                     solutionString += "\(solutionWord.count) letters\n"
                     solutions.append(solutionWord)
-                    
+
                     let bits = answer.components(separatedBy: "|")
                     letterBits += bits
                 }
             }
         }
         
+        DispatchQueue.main.async { [ weak self ] in
+            self?.setLevel(clueString: clueString, solutionString: solutionString, letterBits: letterBits)
+        }
+        
+    }
+    
+    @objc func setLevel(clueString: String, solutionString: String, letterBits: [String]) {
         cluesLabel.text = clueString.trimmingCharacters(in: .whitespacesAndNewlines)
         answersLabel.text = solutionString.trimmingCharacters(in: .whitespacesAndNewlines)
         
@@ -217,7 +224,7 @@ class ViewController: UIViewController {
         level += 1
         
         solutions.removeAll(keepingCapacity: true)
-        loadLevel()
+        performSelector(inBackground: #selector(loadLevel), with: nil)
         
         for button in letterButtons {
             button.isHidden = false
