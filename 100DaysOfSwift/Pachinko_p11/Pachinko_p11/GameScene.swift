@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import UIKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     var scoreLabel: SKLabelNode!
@@ -26,6 +27,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    var ballCountLabel: SKLabelNode!
+    var ballCount = 5 {
+        didSet {
+            ballCountLabel.text = "Balls left: \(ballCount)"
+        }
+    }
+    
     override func didMove(to view: SKView) {
         let background = SKSpriteNode(imageNamed: "background")
         background.position = CGPoint(x: 512, y: 384)
@@ -43,6 +51,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         editLabel.text = "Edit"
         editLabel.position = CGPoint(x: 88, y: 700)
         addChild(editLabel)
+        
+        ballCountLabel = SKLabelNode(fontNamed: "Chalkduster")
+        ballCountLabel.text = "Balls left: 5"
+        ballCountLabel.horizontalAlignmentMode = .center
+        ballCountLabel.position = CGPoint(x: 512, y: 700)
+        addChild(ballCountLabel)
         
         physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
         physicsWorld.contactDelegate = self
@@ -75,16 +89,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 box.position = location
                 box.physicsBody = SKPhysicsBody(rectangleOf: box.size)
                 box.physicsBody?.isDynamic = false
+                box.name = "box"
                 addChild(box)
             } else {
+                if (ballCount == 0) {
+                    return
+                }
+                
                 let ballName = ["ballBlue", "ballCyan", "ballGreen", "ballGrey", "ballPurple" , "ballRed", "ballYellow"].randomElement()
                 let ball = SKSpriteNode(imageNamed: ballName!)
                 ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.size.width / 2)
                 ball.physicsBody?.restitution = 0.4
                 ball.physicsBody?.contactTestBitMask = ball.physicsBody?.collisionBitMask ?? 0
-                ball.position = location.applying(CGAffineTransform(translationX: 0, y: 700 - ball.position.y))
+                ball.position = CGPoint(x: location.x, y: 600)
+                
                 ball.name = "ball"
                 addChild(ball)
+                
+                ballCount -= 1
             }
         }
     }
@@ -96,6 +118,7 @@ extension GameScene {
         bouncer.position = position
         bouncer.physicsBody = SKPhysicsBody(circleOfRadius: bouncer.size.width / 2)
         bouncer.physicsBody?.isDynamic = false
+        bouncer.zPosition = 1
         addChild(bouncer)
     }
     
@@ -132,9 +155,12 @@ extension GameScene {
         if object.name == "good" {
             destroy(ball: ball)
             score += 1
+            ballCount += 1
         } else if object.name == "bad" {
             destroy(ball: ball)
             score -= 1
+        } else if object.name == "box" {
+            object.removeFromParent()
         }
     }
     
