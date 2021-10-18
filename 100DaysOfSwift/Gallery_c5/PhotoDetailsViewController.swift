@@ -9,12 +9,16 @@ import UIKit
 
 class PhotoDetailsViewController: UIViewController {
     
-    var image: UIImage!
-
+    @IBOutlet var imageView: UIImageView!
+    var imagePath: URL!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
         
+        if let imageData = try? Data(contentsOf: imagePath) {
+            imageView.image = UIImage(data: imageData)
+        }
     }
     
 
