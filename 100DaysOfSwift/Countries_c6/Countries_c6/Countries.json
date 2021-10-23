@@ -1,0 +1,16 @@
+[
+    {
+        "name": "Russia",
+        "capital": "Moscow",
+        "size": 17098246,
+        "population": 146171015,
+        "currency": "Ruble"
+    },
+    {
+        "name": "Slovenia",
+        "capital": "Ljubljana",
+        "size": 20271,
+        "population": 2107126,
+        "currency": "Euro"
+    }
+]
