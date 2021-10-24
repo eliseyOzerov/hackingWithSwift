@@ -15,6 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var scoreLabel: SKLabelNode!
     
     var canMove = false
+    var enemiesCreated = 0
     
     var possibleEnemies = ["ball", "hammer", "tv"]
     var gameTimer: Timer?
@@ -25,6 +26,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             scoreLabel.text = "Score: \(score)"
         }
     }
+    
+    var timeInterval = 1.0
     
     override func didMove(to view: SKView) {
         backgroundColor = .black
@@ -51,11 +54,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.gravity = .zero
         physicsWorld.contactDelegate = self
         
-        gameTimer = Timer.scheduledTimer(timeInterval: 0.35, target: self, selector: #selector(createEnemy), userInfo: nil, repeats: true)
+        setTimer()
     }
     
     @objc func createEnemy() {
         guard let enemy = possibleEnemies.randomElement() else { return }
+        
+        if isGameOver {
+            gameTimer?.invalidate()
+            return
+        }
         
         let sprite = SKSpriteNode(imageNamed: enemy)
         sprite.position = CGPoint(x: 1200, y: Int.random(in: 50...736))
@@ -67,6 +75,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         sprite.physicsBody?.angularVelocity = 5
         sprite.physicsBody?.linearDamping = 0
         sprite.physicsBody?.angularDamping = 0
+        
+        enemiesCreated += 1
+        
+        if enemiesCreated % 20 == 0 {
+            timeInterval -= 0.1
+        }
+    }
+    
+    func setTimer() {
+        gameTimer?.invalidate()
+        gameTimer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(createEnemy), userInfo: nil, repeats: true)
     }
     
     override func update(_ currentTime: TimeInterval) {
