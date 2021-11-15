@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E31B0143273E5572003F6C6B /* EditNoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31B0142273E5572003F6C6B /* EditNoteViewController.swift */; };
+		E31B0145273E7EE5003F6C6B /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31B0144273E7EE5003F6C6B /* Note.swift */; };
+		E31B01492742484E003F6C6B /* NotesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31B01482742484E003F6C6B /* NotesListViewController.swift */; };
 		E35B68D12727DE7C00E48C4A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35B68D02727DE7C00E48C4A /* AppDelegate.swift */; };
 		E35B68D32727DE7C00E48C4A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35B68D22727DE7C00E48C4A /* SceneDelegate.swift */; };
 		E35B68D52727DE7C00E48C4A /* FoldersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35B68D42727DE7C00E48C4A /* FoldersViewController.swift */; };
@@ -14,11 +17,16 @@
 		E35B68DA2727DE8100E48C4A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E35B68D92727DE8100E48C4A /* Assets.xcassets */; };
 		E35B68DD2727DE8100E48C4A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E35B68DB2727DE8100E48C4A /* LaunchScreen.storyboard */; };
 		E3892CCA27297966007A7927 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3892CC927297966007A7927 /* Extensions.swift */; };
+		E394B2E7272D5A1200C210F2 /* FoldersTableViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E394B2E6272D5A1200C210F2 /* FoldersTableViewDelegate.swift */; };
+		E394B2E9272D5BE900C210F2 /* FoldersTableViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E394B2E8272D5BE900C210F2 /* FoldersTableViewDataSource.swift */; };
 		E3AB0EE4272A8C8200780F15 /* TableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AB0EE3272A8C8200780F15 /* TableViewHeader.swift */; };
 		E3AB0EE6272A8F7A00780F15 /* SearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AB0EE5272A8F7A00780F15 /* SearchResultsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E31B0142273E5572003F6C6B /* EditNoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNoteViewController.swift; sourceTree = "<group>"; };
+		E31B0144273E7EE5003F6C6B /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		E31B01482742484E003F6C6B /* NotesListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesListViewController.swift; sourceTree = "<group>"; };
 		E35B68CD2727DE7C00E48C4A /* NotesReplica_c8.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotesReplica_c8.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E35B68D02727DE7C00E48C4A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E35B68D22727DE7C00E48C4A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -28,6 +36,8 @@
 		E35B68DC2727DE8100E48C4A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E35B68DE2727DE8100E48C4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E3892CC927297966007A7927 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		E394B2E6272D5A1200C210F2 /* FoldersTableViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldersTableViewDelegate.swift; sourceTree = "<group>"; };
+		E394B2E8272D5BE900C210F2 /* FoldersTableViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldersTableViewDataSource.swift; sourceTree = "<group>"; };
 		E3AB0EE3272A8C8200780F15 /* TableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewHeader.swift; sourceTree = "<group>"; };
 		E3AB0EE5272A8F7A00780F15 /* SearchResultsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -72,6 +82,11 @@
 				E35B68DE2727DE8100E48C4A /* Info.plist */,
 				E3892CC927297966007A7927 /* Extensions.swift */,
 				E3AB0EE3272A8C8200780F15 /* TableViewHeader.swift */,
+				E31B0142273E5572003F6C6B /* EditNoteViewController.swift */,
+				E31B01482742484E003F6C6B /* NotesListViewController.swift */,
+				E31B0144273E7EE5003F6C6B /* Note.swift */,
+				E394B2E6272D5A1200C210F2 /* FoldersTableViewDelegate.swift */,
+				E394B2E8272D5BE900C210F2 /* FoldersTableViewDataSource.swift */,
 			);
 			path = NotesReplica_c8;
 			sourceTree = "<group>";
@@ -147,9 +162,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E394B2E9272D5BE900C210F2 /* FoldersTableViewDataSource.swift in Sources */,
 				E35B68D52727DE7C00E48C4A /* FoldersViewController.swift in Sources */,
 				E3AB0EE6272A8F7A00780F15 /* SearchResultsViewController.swift in Sources */,
 				E35B68D12727DE7C00E48C4A /* AppDelegate.swift in Sources */,
+				E31B0143273E5572003F6C6B /* EditNoteViewController.swift in Sources */,
+				E31B0145273E7EE5003F6C6B /* Note.swift in Sources */,
+				E394B2E7272D5A1200C210F2 /* FoldersTableViewDelegate.swift in Sources */,
+				E31B01492742484E003F6C6B /* NotesListViewController.swift in Sources */,
 				E3AB0EE4272A8C8200780F15 /* TableViewHeader.swift in Sources */,
 				E35B68D32727DE7C00E48C4A /* SceneDelegate.swift in Sources */,
 				E3892CCA27297966007A7927 /* Extensions.swift in Sources */,

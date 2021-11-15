@@ -8,69 +8,69 @@
 import UIKit
 
 class FoldersViewController: UIViewController {
-    var tableView: UITableView!
-    var sections = ["iCloud"]
-    var collapsedSections = Set<Int>()
-    
-    let x = 4
+    var tableView: CustomTableView!
     
     var searchController: UISearchController!
     var resultsController: SearchResultsViewController!
     
+    var tableViewDelegate: FoldersTableViewDelegate!
+    var tableViewDataSource: FoldersTableViewDataSource!
+    
     override func loadView() {
         super.loadView()
+        tableViewDelegate = FoldersTableViewDelegate()
+        tableViewDataSource = FoldersTableViewDataSource()
+        tableViewDelegate.dataSource = tableViewDataSource
+        
         setupViews()
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadNotes()
     }
 }
 
-// MARK: - Interaction methods
+// MARK: - Selectors and other methods
 extension FoldersViewController {
-    
-    func indexPathsForSection(section: Int) -> [IndexPath] {
-        var indexPaths = [IndexPath]()
-        
-        for row in 0..<x {
-            indexPaths.append(IndexPath(row: row, section: section))
-        }
-        
-        return indexPaths
-    }
-
+    // Selectors
     @objc func edit() {
         
     }
     
     @objc func newNote() {
-        
+        let vc = EditNoteViewController(note: Note(), otherNotes: tableViewDataSource.notes)
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc func addFolder() {
         
     }
     
-    @objc func hideSection(sender: UIButton) {
-        let section = sender.tag
-        let paths = indexPathsForSection(section: section)
-        
-        if !collapsedSections.contains(section) {
-            collapsedSections.insert(section)
-            tableView.deleteRows(at: paths, with: .top)
-        } else {
-            collapsedSections.remove(section)
-            tableView.insertRows(at: paths, with: .top)
+    // Other
+    func loadNotes() {
+        DispatchQueue.global().async {
+            let docUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            guard let jsonData = try? String(contentsOf: docUrl.appendingPathComponent("notes")).data(using: .utf8) else {
+                print("No notes have been created just yet")
+                return
+            }
+            guard let notes = try? JSONDecoder().decode([Note].self, from: jsonData) else {
+                fatalError("Could not decode data into a Note array")
+            }
+            DispatchQueue.main.async { [ weak self ] in
+                self?.tableViewDataSource.notes = notes
+                self?.tableView.reloadData()
+            }
         }
     }
 }
 
 // MARK: - Views Setup
-extension FoldersViewController {
+private extension FoldersViewController {
     func setupViews() {
         view.backgroundColor = .systemGroupedBackground
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(edit))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(edit))
         setupTableView()
         setupTitleView()
         setupSearchBarView()
@@ -79,13 +79,14 @@ extension FoldersViewController {
     }
     
     func setupTableView() {
-        tableView = UITableView(frame: view.frame, style: .insetGrouped)
-        view.addSubview(tableView)
+        tableView = CustomTableView(frame: view.frame, style: .insetGrouped)
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.register(CustomHeaderView.self, forHeaderFooterViewReuseIdentifier: "header")
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.delegate = self
-        tableView.dataSource = self
+        tableViewDelegate.tableView = tableView
+        tableView.delegate = tableViewDelegate
+        tableView.dataSource = tableViewDataSource
+        view.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -107,7 +108,6 @@ extension FoldersViewController {
     
     func setupSearchBarView() {
         resultsController = SearchResultsViewController()
-        resultsController.tableView.delegate = self
         searchController = UISearchController(searchResultsController: resultsController)
         searchController.delegate = self
         searchController.searchBar.delegate = self
@@ -138,51 +138,18 @@ extension FoldersViewController: UISearchBarDelegate, UISearchControllerDelegate
     }
 }
 
-// MARK: - TableView delegate methods
-extension FoldersViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        1
+// this is needed to be able to scroll the tableView if used pressed and dragged the tableview header,
+// considering it's a button. if [touchesShouldCancel] returns false, it doesn't work.
+class CustomTableView: UITableView {
+    override init(frame: CGRect, style: UITableView.Style) {
+        super.init(frame: frame, style: style)
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if collapsedSections.contains(section) {
-            return 0
-        }
-        
-        return x
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        52
-    }
-    
-    // apparently not using this callback fucks up the whole animation (unless it's .fade or .middle)
-    func tableView(_ tableView: UITableView, estimatedHeightForHeaderInSection section: Int) -> CGFloat {
-        52
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        var configuration = UIListContentConfiguration.cell()
-        configuration.text = "Row \(indexPath.row)"
-        configuration.image = UIImage(systemName: "folder")
-        cell.contentConfiguration = configuration
-        cell.accessoryType = .disclosureIndicator
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        if let view = view as? CustomHeaderView {
-            view.button.frame = CGRect(x: 20, y: 0, width: tableView.contentSize.width - 40, height: 52)
-            view.button.tag = section
-            view.button.addTarget(self, action: #selector(hideSection), for: .touchUpInside)
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        tableView.dequeueReusableHeaderFooterView(withIdentifier: "header") as? CustomHeaderView
+    override func touchesShouldCancel(in view: UIView) -> Bool {
+        true
     }
 }
