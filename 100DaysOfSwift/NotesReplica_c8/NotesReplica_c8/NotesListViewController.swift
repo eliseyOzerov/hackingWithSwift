@@ -9,12 +9,18 @@ import UIKit
 
 class NotesListViewController: UIViewController {
     var tableView: UITableView!
-    var notes = [Note]()
+    let emptyView = UILabel()
+    var notes = [Note]() {
+        didSet {
+            setupFooter()
+            emptyView.isHidden = !notes.isEmpty
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         setupViews()
+        loadData()
     }
 
 }
@@ -25,10 +31,11 @@ extension NotesListViewController {
         setupHeader()
         setupTableView()
         setupFooter()
+        setupEmptyView()
     }
     
     func setupHeader() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "circle.ellipsis"), style: .plain, target: self, action: #selector(moreMenu))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(moreMenu))
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .automatic
         navigationItem.searchController = UISearchController()
@@ -40,6 +47,7 @@ extension NotesListViewController {
         tableView = UITableView(frame: view.frame, style: .insetGrouped)
         view.addSubview(tableView)
         tableView.delegate = self
+        tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "noteCell")
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -51,13 +59,32 @@ extension NotesListViewController {
     }
     
     func setupFooter() {
-        navigationController?.toolbarItems = [
-            UIBarButtonItem(image: UIImage(systemName: "square.and.pencil")?.withTintColor(UIColor.red.withAlphaComponent(0)), style: .plain, target: self, action: nil),
-            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil),
-            UIBarButtonItem(title: "33 Notes", style: .plain, target: self, action: nil),
-            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil),
+        navigationController?.isToolbarHidden = false
+        let opacity = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), style: .plain, target: self, action: nil)
+        opacity.tintColor = .black.withAlphaComponent(0)
+        let text = UIBarButtonItem(title: "\(notes.count) Notes", style: .plain, target: self, action: nil)
+        text.setTitleTextAttributes([.foregroundColor: UIColor.black, .font: UIFont.systemFont(ofSize: 12)], for: .normal)
+        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+        toolbarItems = [
+            opacity,
+            space,
+            text,
+            space,
             UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), style: .plain, target: self, action: #selector(addNote)),
         ]
+    }
+    
+    func setupEmptyView() {
+        emptyView.text = "You have no notes yet"
+        emptyView.font = UIFont.systemFont(ofSize: 16)
+        emptyView.textColor = .gray
+        emptyView.isHidden = !notes.isEmpty
+        view.addSubview(emptyView)
+        emptyView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            emptyView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
 }
 
@@ -68,7 +95,8 @@ extension NotesListViewController {
     }
     
     @objc func addNote() {
-        
+        let vc = EditNoteViewController(note: Note(), otherNotes: notes, vc: self)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -81,6 +109,7 @@ extension NotesListViewController: UITableViewDelegate, UITableViewDataSource {
         let note = notes[indexPath.row]
         config.text = note.text
         config.secondaryText = note.lastChanged.format("dd/MM/yyyy")
+        cell.contentConfiguration = config
         return cell
     }
     
@@ -90,6 +119,36 @@ extension NotesListViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         notes.count
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
+        var otherNotes = notes
+        notes.remove(at: indexPath.row)
+        let vc = EditNoteViewController(note: otherNotes[indexPath.row], otherNotes: otherNotes, vc: self)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+//    func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
+//        false
+//    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] action, view, _ in
+            self?.notes.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .top)
+            let docUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let url = docUrl.appendingPathComponent("notes")
+            if let jsonData = try? JSONEncoder().encode(self?.notes) {
+                do {
+                    try jsonData.write(to: url)
+                } catch {
+                    fatalError("Failed to save data to url [\(url)]. Error: \(error)")
+                }
+            }
+            
+        }
+        return UISwipeActionsConfiguration(actions: [delete])
     }
 }
 
@@ -104,5 +163,20 @@ extension Date {
         formatter.dateFormat = format
         formatter.timeZone = TimeZone(abbreviation: "UTC")
         return formatter.string(from: self)
+    }
+}
+
+// MARK: - Data loading
+extension NotesListViewController {
+    func loadData() {
+        let docUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let url = docUrl.appendingPathComponent("notes")
+        if let jsonData = try? String(contentsOf: url).data(using: .utf8) {
+            if let data = try? JSONDecoder().decode([Note].self, from: jsonData) {
+                notes = data
+                emptyView.isHidden = !notes.isEmpty
+                tableView.reloadData()
+            }
+        }
     }
 }

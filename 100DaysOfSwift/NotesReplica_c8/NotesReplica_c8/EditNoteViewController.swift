@@ -8,17 +8,20 @@
 import UIKit
 
 class EditNoteViewController: UIViewController {
-    var editingNote: Note?
+    var editingNote: Note!
     var otherNotes: [Note]!
     
     var textView: UITextView!
     
     var saveTimer: Timer?
     
-    init(note: Note?, otherNotes: [Note]) {
+    var vc: NotesListViewController!
+    
+    init(note: Note?, otherNotes: [Note], vc: NotesListViewController) {
         super.init(nibName: nil, bundle: nil)
         self.editingNote = note
         self.otherNotes = otherNotes
+        self.vc = vc
     }
     
     required init?(coder: NSCoder) {
@@ -47,6 +50,7 @@ extension EditNoteViewController {
         textView = UITextView()
         textView.font = UIFont.systemFont(ofSize: 16)
         textView.delegate = self
+        textView.text = editingNote.text
         view.addSubview(textView)
         textView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -70,6 +74,7 @@ extension EditNoteViewController {
     }
     
     func saveNote() {
+        print("Save note")
         let docUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let url = docUrl.appendingPathComponent("notes")
         if editingNote == nil {
@@ -86,6 +91,8 @@ extension EditNoteViewController {
         } catch {
             fatalError("Failed to save data to url [\(url)]. Error: \(error)")
         }
+        vc.notes.insert(editingNote!, at: 0)
+        vc.tableView.reloadData()
     }
 }
 
@@ -101,7 +108,7 @@ extension EditNoteViewController: UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
         saveTimer?.invalidate()
-        saveTimer = Timer(timeInterval: 1, repeats: false) { [weak self] timer in
+        saveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] timer in
             self?.saveNote()
         }
     }
